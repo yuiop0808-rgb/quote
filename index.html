@@ -181,8 +181,10 @@ body.kakao-mode .app-header { top:0; }
   <div class="card">
     <div class="card-header"><span class="icon">&#128203;</span>수 신 처</div>
     <div class="card-body">
-      <div class="field-row">
+      <div class="field-row full">
         <div class="field"><label>받는 분 (귀하)</label><input type="text" id="recipient" value="노한석 대표" autocomplete="off"></div>
+      </div>
+      <div class="field-row full">
         <div class="field"><label>견적 제출일</label><input type="text" id="docDate" placeholder="예) 2026.03.19" autocomplete="off"></div>
       </div>
       <div class="field-row full">
@@ -217,7 +219,7 @@ body.kakao-mode .app-header { top:0; }
     <div class="card-header"><span class="icon">&#128176;</span>합 계</div>
     <div class="card-body">
       <div class="sum-text-box">
-        <span class="sum-number" id="sumNumber">견적금액 : 0원</span>
+        <span class="sum-number" id="sumNumber">견적금액 (부가세포함) :<br>0원</span>
         <span class="sum-validity">&#8251; 본 견적의 유효기간은 견적서 작성일로부터 15일.</span>
       </div>
       <div class="nego-wrap">
@@ -228,6 +230,7 @@ body.kakao-mode .app-header { top:0; }
         <tr><td class="t-label">공급가액</td><td class="t-val" id="tSupply">&#8361;0</td></tr>
         <tr><td class="t-label">부가세 (10%)</td><td class="t-val" id="tVat">&#8361;0</td></tr>
         <tr class="t-divider"><td class="t-label">소계</td><td class="t-val" id="tSubtotal">&#8361;0</td></tr>
+        <tr id="tNegoRow" style="display:none"><td class="t-label">네고금액</td><td class="t-val" id="tNego" style="color:#c0392b;">&#8361;0</td></tr>
         <tr class="t-divider t-grand"><td class="t-label">최종 합계</td><td class="t-val" id="tGrand">&#8361;0</td></tr>
       </table>
     </div>
@@ -362,7 +365,15 @@ function calcTotals() {
   document.getElementById('tVat').textContent      = fmt(vat);
   document.getElementById('tSubtotal').textContent = fmt(subtotal);
   document.getElementById('tGrand').textContent    = fmt(grand);
-  document.getElementById('sumNumber').textContent = '\uacac\uc801\uae08\uc561 : ' + fmtN(grand) + '\uc6d0';
+  var negoRowEl = document.getElementById('tNegoRow');
+  var negoValEl = document.getElementById('tNego');
+  if (nego > 0) {
+    negoValEl.textContent = '-' + fmtN(nego) + '\uc6d0';
+    negoRowEl.style.display = '';
+  } else {
+    negoRowEl.style.display = 'none';
+  }
+  document.getElementById('sumNumber').innerHTML = '\uacac\uc801\uae08\uc561 (\ubd80\uac00\uc138\ud3ec\ud568) :<br>' + fmtN(grand) + '\uc6d0';
 }
 
 function showPreview() {
@@ -387,7 +398,7 @@ function showPreview() {
   }
 
   var g = function(id) { return esc(document.getElementById(id).value || ''); };
-  var negoRow = nego > 0 ? '<tr><td>\ub124\uace0\uae08\uc561</td><td>' + fmtN(nego) + '</td></tr>' : '';
+  var negoRow = nego > 0 ? '<tr><td>\ub124\uace0\uae08\uc561</td><td>-' + fmtN(nego) + '</td></tr>' : '';
 
   var h = '';
   h += '<div class="doc-title">\uacac &nbsp; \uc801 &nbsp; \uc11c</div>';
@@ -397,7 +408,7 @@ function showPreview() {
   h += '<div class="doc-site">\ud604\uc7a5\uba85 : ' + g('siteName') + '</div>';
   h += '<div class="doc-date">\uacac\uc801 \uc81c\ucd9c\uc77c : ' + g('docDate') + '</div>';
   h += '<div style="height:10px"></div>';
-  h += '<div class="doc-sum-num">\uacac\uc801\uae08\uc561 : ' + fmtN(grand) + '\uc6d0</div>';
+  h += '<div class="doc-sum-num">\uacac\uc801\uae08\uc561 (\ubd80\uac00\uc138\ud3ec\ud568) :<br>' + fmtN(grand) + '\uc6d0</div>';
   h += '<div class="doc-validity">&#8251; \ubcf8 \uacac\uc801\uc758 \uc720\ud6a8\uae30\uac04\uc740 \uacac\uc801\uc11c \uc791\uc131\uc77c\ub85c\ubd80\ud130 15\uc77c.</div>';
   h += '</div>';
   h += '<div class="doc-meta-right"><table>';
