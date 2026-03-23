@@ -90,6 +90,52 @@ html,body { font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans
 .doc-totals td:first-child { background:#f5f5f5; font-weight:600; }
 .doc-totals td:last-child { text-align:right; font-weight:600; }
 .doc-grand td { background:#1a1a2e !important; color:#c8a96e !important; font-size:13px; }
+/* ===== 카카오 감지 배너 ===== */
+#kakaoBanner {
+  display:none;
+  position:fixed; top:0; left:0; right:0; z-index:9999;
+  background:#f9e000;
+  padding:16px 16px 14px;
+  -webkit-box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+}
+#kakaoBanner.show { display:block; }
+.kb-close {
+  position:absolute; top:12px; right:14px;
+  background:rgba(0,0,0,0.12); border:none; border-radius:50%;
+  width:26px; height:26px; font-size:15px; cursor:pointer;
+  display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; -webkit-justify-content:center; justify-content:center;
+  color:#333; -webkit-appearance:none; appearance:none;
+}
+.kb-title {
+  font-size:15px; font-weight:700; color:#111; margin-bottom:6px; padding-right:30px;
+}
+.kb-title span { font-size:20px; margin-right:6px; }
+.kb-desc { font-size:12px; color:#333; margin-bottom:12px; line-height:1.5; }
+.kb-desc b { color:#111; }
+.kb-steps {
+  display:-webkit-flex; display:flex; margin-bottom:14px;
+}
+.kb-step {
+  -webkit-flex:1; flex:1; text-align:center; font-size:11px; color:#555; font-weight:500;
+}
+.kb-step-num {
+  display:inline-block; background:#333; color:#f9e000;
+  border-radius:50%; width:20px; height:20px; line-height:20px;
+  font-size:11px; font-weight:700; margin-bottom:4px;
+}
+.kb-step-arrow { font-size:16px; color:#999; padding-top:8px; -webkit-flex:none; flex:none; padding-left:2px; padding-right:2px; }
+.kb-copy-btn {
+  display:block; width:100%; padding:13px;
+  background:#1a1a2e; color:#f9e000;
+  border:none; border-radius:10px;
+  font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  font-size:15px; font-weight:700; cursor:pointer;
+  text-align:center; letter-spacing:1px;
+  -webkit-appearance:none; appearance:none;
+}
+/* 배너 보일 때 본문 아래로 밀기 */
+body.kakao-mode .app-header { top:0; }
 @media print {
   .modal-actions { display:none !important; }
   body { background:white !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -104,6 +150,21 @@ html,body { font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans
 </style>
 </head>
 <body>
+
+<!-- 카카오톡 감지 배너 -->
+<div id="kakaoBanner">
+  <button class="kb-close" id="kbClose">&#10005;</button>
+  <div class="kb-title"><span>&#128241;</span>카카오톡 브라우저 감지됨</div>
+  <div class="kb-desc">카카오톡 내에서는 <b>일부 기능이 제한</b>됩니다.<br>아래 방법으로 Safari에서 열면 모든 기능을 사용할 수 있습니다.</div>
+  <div class="kb-steps">
+    <div class="kb-step"><div class="kb-step-num">1</div><br>주소 복사</div>
+    <div class="kb-step-arrow">›</div>
+    <div class="kb-step"><div class="kb-step-num">2</div><br>Safari 앱 실행</div>
+    <div class="kb-step-arrow">›</div>
+    <div class="kb-step"><div class="kb-step-num">3</div><br>주소창에 붙여넣기</div>
+  </div>
+  <button class="kb-copy-btn" id="kbCopyBtn">&#128203; 주소 복사하기</button>
+</div>
 
 <div class="app-header">
   <div class="header-inner">
@@ -179,11 +240,15 @@ html,body { font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans
   <div class="modal-doc">
     <div class="modal-actions">
       <button class="btn-close-modal" id="btnModalClose">&#10005; 닫기</button>
-      <button class="btn-do-print" id="btnModalPrint">&#128424; 인쇄</button>
+      <button class="btn-do-print" id="btnModalSave">&#128247; 이미지저장</button>
+      <button class="btn-do-print" id="btnModalPrint" style="background:#4a4a6a;">&#128424; 인쇄</button>
     </div>
     <div id="previewContent"></div>
   </div>
 </div>
+
+<!-- html2canvas: 이미지 저장용 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
 // ----------------------------------------------------------------
@@ -365,6 +430,62 @@ function closePreview() {
   document.getElementById('previewModal').classList.remove('active');
 }
 
+// ---- 카카오톡 감지 ----
+function isKakao() {
+  var ua = navigator.userAgent || '';
+  return ua.indexOf('KAKAOTALK') !== -1 || ua.indexOf('kakaotalk') !== -1 || ua.indexOf('KakaoTalk') !== -1;
+}
+
+// ---- 이미지 저장 ----
+function saveAsImage() {
+  var target = document.getElementById('previewContent');
+  if (!target) return;
+  var btn = document.getElementById('btnModalSave');
+  if (btn) { btn.textContent = '\u2026 \uc800\uc7a5\uc911'; btn.disabled = true; }
+
+  // html2canvas 로드 확인
+  if (typeof html2canvas === 'undefined') {
+    alert('이미지 저장 기능을 불러오는 중입니다. 잠시 후 다시 눌러주세요.');
+    if (btn) { btn.textContent = '\ud83d\udcf7 \uc774\ubbf8\uc9c0\uc800\uc7a5'; btn.disabled = false; }
+    return;
+  }
+
+  html2canvas(target, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    logging: false
+  }).then(function(canvas) {
+    var today = new Date();
+    var fname = '\uacac\uc801\uc11c_' + today.getFullYear() + (today.getMonth()+1) + today.getDate() + '.png';
+
+    // 카카오/iOS: canvas를 새 탭에 열어서 길게 눌러 저장 안내
+    if (isKakao() || /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      var img = new Image();
+      img.src = canvas.toDataURL('image/png');
+      img.style.cssText = 'max-width:100%;display:block;';
+      var w = window.open('', '_blank');
+      if (w) {
+        w.document.write('<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>\uacac\uc801\uc11c</title></head><body style="margin:0;background:#eee;padding:10px;"><p style="font-size:13px;color:#555;margin-bottom:8px;text-align:center">\uc774\ubbf8\uc9c0\ub97c \uae38\uac8c \ub20c\ub7ec \uc0ac\uc9c4\uc559\uc5d4\uc5d0 \uc800\uc7a5\ud558\uc138\uc694</p></body></html>');
+        w.document.body.appendChild(img);
+        w.document.close();
+      } else {
+        alert('\ud31d\uc5c5\uc774 \ucc28\ub2e8\ub418\uc5c8\uc2b5\ub2c8\ub2e4. Safari\uc5d0\uc11c \uc5f4\uc5b4\uc8fc\uc138\uc694.');
+      }
+    } else {
+      // PC/Android: 직접 다운로드
+      var link = document.createElement('a');
+      link.download = fname;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    if (btn) { btn.textContent = '\ud83d\udcf7 \uc774\ubbf8\uc9c0\uc800\uc7a5'; btn.disabled = false; }
+  }).catch(function() {
+    alert('\uc800\uc7a5 \uc911 \uc624\ub958\uac00 \ubc1c\uc0dd\ud588\uc2b5\ub2c8\ub2e4.');
+    if (btn) { btn.textContent = '\ud83d\udcf7 \uc774\ubbf8\uc9c0\uc800\uc7a5'; btn.disabled = false; }
+  });
+}
+
 // ---- 이벤트 바인딩 ----
 // 카카오톡 인앱브라우저: DOMContentLoaded 래핑 + touchend 폴백
 function bindEvents() {
@@ -455,8 +576,44 @@ function bindEvents() {
 
   bindBtn('btnTopPreview',    function() { showPreview(); });
   bindBtn('btnBottomPreview', function() { showPreview(); });
+  bindBtn('btnModalSave',     function() { saveAsImage(); });
   bindBtn('btnModalClose',    function() { closePreview(); });
   bindBtn('btnModalPrint',    function() { window.print(); });
+
+  // 카카오 감지 배너 버튼
+  var kbClose = document.getElementById('kbClose');
+  var kbCopy  = document.getElementById('kbCopyBtn');
+  if (kbClose) {
+    kbClose.addEventListener('click',    function() { document.getElementById('kakaoBanner').classList.remove('show'); });
+    kbClose.addEventListener('touchend', function(e) { e.preventDefault(); document.getElementById('kakaoBanner').classList.remove('show'); });
+  }
+  if (kbCopy) {
+    function doCopy() {
+      var url = window.location.href;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() {
+          kbCopy.textContent = '\u2705 \uc8fc\uc18c \ubcf5\uc0ac \uc644\ub8cc!';
+          setTimeout(function() { kbCopy.textContent = '\ud83d\udccb \uc8fc\uc18c \ubcf5\uc0ac\ud558\uae30'; }, 2000);
+        }).catch(function() { fallbackCopy(url); });
+      } else { fallbackCopy(url); }
+    }
+    function fallbackCopy(url) {
+      var ta = document.createElement('textarea');
+      ta.value = url; ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand('copy'); kbCopy.textContent = '\u2705 \uc8fc\uc18c \ubcf5\uc0ac \uc644\ub8cc!'; }
+      catch(e) { alert('\uc8fc\uc18c: ' + url); }
+      document.body.removeChild(ta);
+      setTimeout(function() { kbCopy.textContent = '\ud83d\udccb \uc8fc\uc18c \ubcf5\uc0ac\ud558\uae30'; }, 2000);
+    }
+    kbCopy.addEventListener('click',    function() { doCopy(); });
+    kbCopy.addEventListener('touchend', function(e) { e.preventDefault(); doCopy(); });
+  }
+
+  // 카카오 감지 시 배너 표시
+  if (isKakao()) {
+    document.getElementById('kakaoBanner').classList.add('show');
+  }
 
   var modal = document.getElementById('previewModal');
   if (modal) {
