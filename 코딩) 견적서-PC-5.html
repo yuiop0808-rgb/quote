@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<title>견적서</title>
+<style>
+* { -webkit-box-sizing:border-box; box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body { font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; background:#1a1a2e; min-height:100%; color:#1a1a2e; -webkit-text-size-adjust:100%; }
+.app-header { background:#1a1a2e; padding:16px 20px 0; position:-webkit-sticky; position:sticky; top:0; z-index:100; }
+.header-inner { display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; -webkit-justify-content:space-between; justify-content:space-between; padding-bottom:14px; border-bottom:1px solid rgba(200,169,110,0.3); }
+.header-title { color:#c8a96e; font-size:22px; font-weight:700; letter-spacing:4px; }
+.header-sub { color:rgba(200,169,110,0.55); font-size:11px; letter-spacing:1px; margin-top:2px; }
+.btn-preview { background:#c8a96e; color:#1a1a2e; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer; -webkit-appearance:none; appearance:none; }
+.main { padding:16px; max-width:640px; margin:0 auto; }
+.card { background:#faf8f4; border-radius:16px; margin-bottom:14px; overflow:hidden; -webkit-box-shadow:0 2px 20px rgba(26,26,46,0.08); box-shadow:0 2px 20px rgba(26,26,46,0.08); }
+.card-header { background:#1a1a2e; color:#c8a96e; padding:12px 18px; font-size:12px; font-weight:700; letter-spacing:3px; display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; }
+.card-header .icon { margin-right:8px; }
+.card-body { padding:16px 18px; }
+.field-row { display:-webkit-flex; display:flex; -webkit-flex-wrap:wrap; flex-wrap:wrap; margin-bottom:12px; margin-left:-6px; margin-right:-6px; }
+.field-row .field { padding-left:6px; padding-right:6px; width:50%; -webkit-box-sizing:border-box; box-sizing:border-box; }
+.field-row.full .field { width:100%; }
+.field { display:-webkit-flex; display:flex; -webkit-flex-direction:column; flex-direction:column; margin-bottom:2px; }
+.field label { font-size:10px; font-weight:700; color:#4a4a6a; letter-spacing:1.5px; margin-bottom:5px; }
+.field input { background:#f0ece4; border:1.5px solid #d8d0c0; border-radius:8px; padding:10px 12px; font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:16px; color:#1a1a2e; width:100%; -webkit-appearance:none; appearance:none; outline:none; }
+.field input:focus { border-color:#c8a96e; background:#fff; }
+.sup-grid { width:100%; border-collapse:collapse; }
+.sup-grid td { padding:5px 0; vertical-align:middle; }
+.sup-label { font-size:11px; color:#4a4a6a; font-weight:500; white-space:nowrap; width:80px; padding-right:8px; }
+.sup-val input { background:#f0ece4; border:1.5px solid #d8d0c0; border-radius:6px; padding:7px 10px; font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:16px; color:#1a1a2e; width:100%; -webkit-appearance:none; appearance:none; outline:none; }
+.sup-val input:focus { border-color:#c8a96e; background:#fff; }
+.item-card { background:#f0ece4; border:1.5px solid #d8d0c0; border-radius:12px; padding:14px; margin-bottom:10px; }
+.item-top { display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; -webkit-justify-content:space-between; justify-content:space-between; margin-bottom:12px; }
+.item-number { background:#1a1a2e; color:#c8a96e; width:24px; height:24px; border-radius:50%; font-size:11px; font-weight:700; display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; -webkit-justify-content:center; justify-content:center; -webkit-flex-shrink:0; flex-shrink:0; }
+.item-remove { background:rgba(192,57,43,0.1); border:none; color:#c0392b; width:32px; height:32px; border-radius:50%; font-size:20px; cursor:pointer; display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; -webkit-justify-content:center; justify-content:center; -webkit-appearance:none; appearance:none; line-height:1; }
+.item-fields { display:-webkit-flex; display:flex; -webkit-flex-wrap:wrap; flex-wrap:wrap; margin-left:-5px; margin-right:-5px; }
+.item-field { padding:0 5px; margin-bottom:10px; -webkit-box-sizing:border-box; box-sizing:border-box; }
+.item-field.w-full { width:100%; }
+.item-field.w-half { width:50%; }
+.item-field label { display:block; font-size:10px; font-weight:700; color:#4a4a6a; letter-spacing:1px; margin-bottom:4px; }
+.item-field input { background:#faf8f4; border:1.5px solid #d8d0c0; border-radius:7px; padding:9px 10px; font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:16px; color:#1a1a2e; width:100%; -webkit-appearance:none; appearance:none; outline:none; }
+.item-field input:focus { border-color:#c8a96e; background:#fff; }
+.item-subtotal { text-align:right; font-size:12px; color:#4a4a6a; margin-top:4px; }
+.item-subtotal strong { color:#1a1a2e; font-size:15px; margin-left:4px; }
+.btn-add-item { width:100%; padding:14px; background:transparent; border:2px dashed #d8d0c0; border-radius:12px; color:#4a4a6a; font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:14px; font-weight:500; cursor:pointer; display:block; text-align:center; -webkit-appearance:none; appearance:none; margin-top:2px; }
+.sum-text-box { background:rgba(26,26,46,0.05); border-left:3px solid #c8a96e; padding:12px 14px; border-radius:0 8px 8px 0; margin-bottom:14px; line-height:1.7; word-break:keep-all; }
+.sum-number { font-size:17px; font-weight:700; color:#1a1a2e; display:block; margin-bottom:1px; }
+.sum-validity { font-size:11px; color:#888; margin-top:8px; display:block; border-top:1px dashed #d8d0c0; padding-top:7px; }
+.nego-wrap { background:rgba(200,169,110,0.08); border-radius:8px; padding:10px 12px; display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; -webkit-justify-content:space-between; justify-content:space-between; margin:4px 0 14px; }
+.nego-wrap label { font-size:12px; font-weight:700; color:#a8893e; letter-spacing:1px; }
+.nego-input { background:#fff; border:1.5px solid #c8a96e; border-radius:7px; padding:8px 10px; font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:16px; font-weight:700; color:#a8893e; width:140px; text-align:right; -webkit-appearance:none; appearance:none; outline:none; }
+.totals-table { width:100%; border-collapse:collapse; }
+.totals-table td { padding:8px 4px; font-size:14px; }
+.t-label { color:#4a4a6a; }
+.t-val { text-align:right; font-weight:700; color:#1a1a2e; }
+.t-divider td { border-top:1px solid #d8d0c0; padding-top:10px; }
+.t-grand .t-label { font-size:16px; font-weight:700; color:#1a1a2e; }
+.t-grand .t-val { font-size:18px; color:#a8893e; }
+.preview-btn { width:100%; padding:16px; background:#1a1a2e; color:#c8a96e; border:none; border-radius:14px; font-size:16px; font-weight:700; letter-spacing:3px; cursor:pointer; display:block; text-align:center; margin-bottom:30px; -webkit-box-shadow:0 4px 20px rgba(26,26,46,0.3); box-shadow:0 4px 20px rgba(26,26,46,0.3); -webkit-appearance:none; appearance:none; }
+.modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); z-index:1000; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 12px; }
+.modal-overlay.active { display:block; }
+.modal-doc { background:#fff; max-width:600px; margin:0 auto; padding:28px 20px; border-radius:4px; }
+.modal-actions { display:-webkit-flex; display:flex; -webkit-justify-content:flex-end; justify-content:flex-end; margin-bottom:16px; }
+.btn-close-modal,.btn-do-print { border:none; border-radius:6px; padding:9px 16px; font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:13px; font-weight:700; cursor:pointer; -webkit-appearance:none; appearance:none; margin-left:8px; }
+.btn-close-modal { background:#eee; color:#333; }
+.btn-do-print { background:#1a1a2e; color:#c8a96e; }
+.doc-title { text-align:center; font-size:26px; font-weight:700; letter-spacing:10px; margin-bottom:18px; color:#111; }
+.doc-meta-wrap { display:-webkit-flex; display:flex; border:1px solid #333; margin-bottom:14px; }
+.doc-meta-left { -webkit-flex:1; flex:1; padding:12px 14px; border-right:1px solid #333; }
+.doc-meta-right { width:52%; }
+.doc-meta-right table { width:100%; border-collapse:collapse; height:100%; }
+.doc-meta-right td { border-bottom:1px solid #ccc; padding:5px 7px; font-size:11px; vertical-align:middle; }
+.doc-meta-right td:first-child { border-right:1px solid #ccc; background:#f5f5f5; font-weight:600; white-space:nowrap; width:72px; }
+.doc-meta-right tr:last-child td { border-bottom:none; }
+.section-title td { background:#1a1a2e !important; color:#c8a96e !important; font-weight:700 !important; font-size:11px; border-color:#1a1a2e !important; }
+.doc-recipient { font-size:17px; font-weight:700; margin-bottom:5px; }
+.doc-site { font-size:12px; color:#555; margin-bottom:3px; }
+.doc-date { font-size:12px; color:#555; margin-bottom:6px; }
+.doc-sum-num { font-size:15px; font-weight:700; color:#111; margin-bottom:2px; }
+.doc-sum-kor { font-size:12px; font-weight:600; color:#333; }
+.doc-validity { font-size:10px; color:#777; margin-top:8px; padding-top:6px; border-top:1px dashed #ccc; }
+.doc-table { width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; }
+.doc-table th { background:#1a1a2e; color:#c8a96e; padding:7px 4px; font-weight:600; text-align:center; border:1px solid #333; }
+.doc-table td { padding:6px 4px; border:1px solid #ccc; text-align:center; vertical-align:middle; }
+.doc-table td.tl { text-align:left; }
+.doc-totals { margin-left:auto; width:52%; }
+.doc-totals table { width:100%; border-collapse:collapse; }
+.doc-totals td { padding:5px 8px; font-size:12px; border:1px solid #ccc; }
+.doc-totals td:first-child { background:#f5f5f5; font-weight:600; }
+.doc-totals td:last-child { text-align:right; font-weight:600; }
+.doc-grand td { background:#1a1a2e !important; color:#c8a96e !important; font-size:13px; }
+@media print {
+  .modal-actions { display:none !important; }
+  body { background:white !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  html { background:white !important; }
+  .modal-overlay { position:static !important; background:none !important; padding:0 !important; display:block !important; overflow:visible !important; }
+  .modal-doc { box-shadow:none !important; padding:0 !important; margin:0 !important; background:white !important; }
+  .app-header,.main { display:none !important; }
+  /* 인쇄 시 하단 여백/배경 완전 제거 */
+  .doc-totals { page-break-after:avoid; }
+  @page { margin:15mm; background:white; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">견 적 서</div>
+      <div class="header-sub">QUOTATION FORM</div>
+    </div>
+    <button class="btn-preview" id="btnTopPreview">&#128065; 미리보기</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="card">
+    <div class="card-header"><span class="icon">&#128203;</span>수 신 처</div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field"><label>받는 분 (귀하)</label><input type="text" id="recipient" value="노한석 대표" autocomplete="off"></div>
+        <div class="field"><label>견적 제출일</label><input type="text" id="docDate" placeholder="예) 2026.03.19" autocomplete="off"></div>
+      </div>
+      <div class="field-row full">
+        <div class="field"><label>현장명</label><input type="text" id="siteName" value="대치동 우성1차 5동 502호" autocomplete="off"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">&#127970;</span>공 급 자 정 보</div>
+    <div class="card-body">
+      <table class="sup-grid">
+        <tr><td class="sup-label">상 호</td><td class="sup-val"><input type="text" id="supCompany" value="주식회사 주하건설" autocomplete="off"></td></tr>
+        <tr><td class="sup-label">업 종</td><td class="sup-val"><input type="text" id="supType" value="실내건축" autocomplete="off"></td></tr>
+        <tr><td class="sup-label">사업자번호</td><td class="sup-val"><input type="text" id="supReg" value="682-87-03440" autocomplete="off"></td></tr>
+        <tr><td class="sup-label">소재지</td><td class="sup-val"><input type="text" id="supAddr" value="시흥시 시청로 25, 320호" autocomplete="off"></td></tr>
+        <tr><td class="sup-label">담당자</td><td class="sup-val"><input type="text" id="supManager" value="최주하" autocomplete="off"></td></tr>
+        <tr><td class="sup-label">대표전화</td><td class="sup-val"><input type="text" id="supTel" value="010-4004-6530" autocomplete="off"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">&#128295;</span>견 적 품 목</div>
+    <div class="card-body">
+      <div id="itemsList"></div>
+      <button class="btn-add-item" id="btnAddItem">&#65291; 품목 추가</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">&#128176;</span>합 계</div>
+    <div class="card-body">
+      <div class="sum-text-box">
+        <span class="sum-number" id="sumNumber">견적금액 : 0원</span>
+        <span class="sum-validity">&#8251; 본 견적의 유효기간은 견적서 작성일로부터 15일.</span>
+      </div>
+      <div class="nego-wrap">
+        <label>네고 금액</label>
+        <input class="nego-input" type="tel" id="negoAmount" placeholder="0">
+      </div>
+      <table class="totals-table">
+        <tr><td class="t-label">공급가액</td><td class="t-val" id="tSupply">&#8361;0</td></tr>
+        <tr><td class="t-label">부가세 (10%)</td><td class="t-val" id="tVat">&#8361;0</td></tr>
+        <tr class="t-divider"><td class="t-label">소계</td><td class="t-val" id="tSubtotal">&#8361;0</td></tr>
+        <tr class="t-divider t-grand"><td class="t-label">최종 합계</td><td class="t-val" id="tGrand">&#8361;0</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <button class="preview-btn" id="btnBottomPreview">&#128196; 견적서 미리보기 / 인쇄</button>
+</div>
+
+<div class="modal-overlay" id="previewModal">
+  <div class="modal-doc">
+    <div class="modal-actions">
+      <button class="btn-close-modal" id="btnModalClose">&#10005; 닫기</button>
+      <button class="btn-do-print" id="btnModalPrint">&#128424; 인쇄</button>
+    </div>
+    <div id="previewContent"></div>
+  </div>
+</div>
+
+<script>
+// ----------------------------------------------------------------
+// 카카오톡 인앱브라우저 완전 호환
+// - 이벤트 위임으로 동적 DOM 이벤트 처리
+// - inline onclick/onchange 완전 제거
+// - CSS var() 미사용 (직접 색상값)
+// - type="number" 대신 type="tel" 사용
+// - ES5 문법
+// ----------------------------------------------------------------
+
+var items = [
+  { name: '실크벽지',        code: '샌드화이트', qty: 90, unit: '평', price: 8000,   note: '' },
+  { name: '부자재',          code: '',           qty: 90, unit: '평', price: 6000,   note: '' },
+  { name: '인건비',          code: '',           qty: 8,  unit: '인', price: 280000, note: '' },
+  { name: '바닥재/데코타일',  code: 'LX6207',    qty: 32, unit: '평', price: 60000,  note: '' }
+];
+
+// 오늘 날짜 세팅
+(function() {
+  var t = new Date();
+  var m = t.getMonth() + 1;
+  var d = t.getDate();
+  document.getElementById('docDate').value =
+    t.getFullYear() + '.' + (m < 10 ? '0' + m : m) + '.' + (d < 10 ? '0' + d : d);
+})();
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function fmt(n) { return '\u20a9' + Math.round(n).toLocaleString('ko-KR'); }
+function fmtN(n) { return Math.round(n).toLocaleString('ko-KR'); }
+function toNum(s) { return parseFloat(String(s).replace(/[^0-9.]/g,'')) || 0; }
+
+function numToKorean(num) {
+  num = Math.round(Math.abs(num));
+  if (num === 0) return '\uc601';
+  var u = ['','\uc77c','\uc774','\uc0bc','\uc0ac','\uc624','\uc721','\uce60','\ud314','\uad6c'];
+  var p = ['','\uc2ed','\ubc31','\ucc9c'];
+  var b = ['','\ub9cc','\uc5b5','\uc870'];
+  var res = ''; var bi = 0;
+  while (num > 0) {
+    var chunk = num % 10000;
+    if (chunk > 0) {
+      var cs = '';
+      for (var x = 3; x >= 0; x--) {
+        var digit = Math.floor(chunk / Math.pow(10, x)) % 10;
+        if (digit > 0) cs += (digit === 1 && x > 0 ? '' : u[digit]) + p[x];
+      }
+      res = cs + b[bi] + res;
+    }
+    bi++; num = Math.floor(num / 10000);
+  }
+  return res;
+}
+
+function getSupply() {
+  var s = 0;
+  for (var i = 0; i < items.length; i++) s += items[i].qty * items[i].price;
+  return Math.round(s);
+}
+function getNego() { return toNum(document.getElementById('negoAmount').value); }
+function getGrand() {
+  var supply = getSupply();
+  return supply + Math.round(supply * 0.1) - getNego();
+}
+
+function renderItems() {
+  var html = '';
+  for (var i = 0; i < items.length; i++) {
+    var it = items[i];
+    html += '<div class="item-card" data-idx="' + i + '">';
+    html += '<div class="item-top">';
+    html += '<div class="item-number">' + (i+1) + '</div>';
+    html += '<button type="button" class="item-remove" data-action="remove" data-idx="' + i + '">\u00d7</button>';
+    html += '</div><div class="item-fields">';
+    html += '<div class="item-field w-full"><label>\ud488\ubaa9\uba85</label>';
+    html += '<input type="text" data-f="name" data-i="' + i + '" value="' + esc(it.name) + '" placeholder="\ud488\ubaa9\uba85 \uc785\ub825" autocomplete="off"></div>';
+    html += '<div class="item-field w-half"><label>\ud488\ubc88 / \uaddc\uaca9</label>';
+    html += '<input type="text" data-f="code" data-i="' + i + '" value="' + esc(it.code) + '" placeholder="\uc120\ud0dd\uc0ac\ud56d" autocomplete="off"></div>';
+    html += '<div class="item-field w-half"><label>\ub2e8\uc704</label>';
+    html += '<input type="text" data-f="unit" data-i="' + i + '" value="' + esc(it.unit) + '" placeholder="\ud3c9,m\u00b2,\uac1c" autocomplete="off"></div>';
+    html += '<div class="item-field w-half"><label>\uc218\ub7c9</label>';
+    html += '<input type="tel" data-f="qty" data-i="' + i + '" value="' + it.qty + '" placeholder="0"></div>';
+    html += '<div class="item-field w-half"><label>\ub2e8\uac00 (\uc6d0)</label>';
+    html += '<input type="tel" data-f="price" data-i="' + i + '" value="' + it.price + '" placeholder="0"></div>';
+    html += '<div class="item-field w-full"><label>\ube44\uace0</label>';
+    html += '<input type="text" data-f="note" data-i="' + i + '" value="' + esc(it.note) + '" placeholder="\uba54\ubaa8" autocomplete="off"></div>';
+    html += '</div>';
+    html += '<div class="item-subtotal" id="sub' + i + '">\uc18c\uacc4: <strong>' + fmt(it.qty * it.price) + '</strong></div>';
+    html += '</div>';
+  }
+  document.getElementById('itemsList').innerHTML = html;
+  calcTotals();
+}
+
+function updateSub(i) {
+  var el = document.getElementById('sub' + i);
+  if (el) el.innerHTML = '\uc18c\uacc4: <strong>' + fmt(items[i].qty * items[i].price) + '</strong>';
+}
+
+function calcTotals() {
+  var supply   = getSupply();
+  var vat      = Math.round(supply * 0.1);
+  var subtotal = supply + vat;
+  var nego     = getNego();
+  var grand    = subtotal - nego;
+
+  document.getElementById('tSupply').textContent   = fmt(supply);
+  document.getElementById('tVat').textContent      = fmt(vat);
+  document.getElementById('tSubtotal').textContent = fmt(subtotal);
+  document.getElementById('tGrand').textContent    = fmt(grand);
+  document.getElementById('sumNumber').textContent = '\uacac\uc801\uae08\uc561 : ' + fmtN(grand) + '\uc6d0';
+}
+
+function showPreview() {
+  var supply   = getSupply();
+  var vat      = Math.round(supply * 0.1);
+  var subtotal = supply + vat;
+  var nego     = getNego();
+  var grand    = subtotal - nego;
+
+  var rows = ''; var idx = 1;
+  for (var i = 0; i < items.length; i++) {
+    var it = items[i];
+    if (!it.name) continue;
+    rows += '<tr><td>' + idx + '</td><td class="tl">' + esc(it.name) + '</td><td>' + esc(it.code) + '</td>';
+    rows += '<td>' + fmtN(it.qty) + '</td><td>' + esc(it.unit) + '</td>';
+    rows += '<td>' + fmtN(it.price) + '</td><td>' + fmtN(it.qty * it.price) + '</td>';
+    rows += '<td>' + esc(it.note) + '</td></tr>';
+    idx++;
+  }
+  for (var e = 0; e < Math.max(0, 10 - (idx-1)); e++) {
+    rows += '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+  }
+
+  var g = function(id) { return esc(document.getElementById(id).value || ''); };
+  var negoRow = nego > 0 ? '<tr><td>\ub124\uace0\uae08\uc561</td><td>' + fmtN(nego) + '</td></tr>' : '';
+
+  var h = '';
+  h += '<div class="doc-title">\uacac &nbsp; \uc801 &nbsp; \uc11c</div>';
+  h += '<div class="doc-meta-wrap">';
+  h += '<div class="doc-meta-left">';
+  h += '<div class="doc-recipient">' + g('recipient') + ' \uadc0\ud558</div>';
+  h += '<div class="doc-site">\ud604\uc7a5\uba85 : ' + g('siteName') + '</div>';
+  h += '<div class="doc-date">\uacac\uc801 \uc81c\ucd9c\uc77c : ' + g('docDate') + '</div>';
+  h += '<div style="height:10px"></div>';
+  h += '<div class="doc-sum-num">\uacac\uc801\uae08\uc561 : ' + fmtN(grand) + '\uc6d0</div>';
+  h += '<div class="doc-validity">&#8251; \ubcf8 \uacac\uc801\uc758 \uc720\ud6a8\uae30\uac04\uc740 \uacac\uc801\uc11c \uc791\uc131\uc77c\ub85c\ubd80\ud130 15\uc77c.</div>';
+  h += '</div>';
+  h += '<div class="doc-meta-right"><table>';
+  h += '<tr class="section-title"><td colspan="2">\uacf5 \uae09 \uc790</td></tr>';
+  h += '<tr><td>\uc0c1 \ud638</td><td>' + g('supCompany') + '</td></tr>';
+  h += '<tr><td>\uc5c5 \uc885</td><td>' + g('supType') + '</td></tr>';
+  h += '<tr><td>\uc0ac\uc5c5\uc790\ubc88\ud638</td><td>' + g('supReg') + '</td></tr>';
+  h += '<tr><td>\uc18c\uc7ac\uc9c0</td><td>' + g('supAddr') + '</td></tr>';
+  h += '<tr><td>\ub2f4\ub2f9\uc790</td><td>' + g('supManager') + '</td></tr>';
+  h += '<tr><td>\ub300\ud45c\uc804\ud654</td><td>' + g('supTel') + '</td></tr>';
+  h += '</table></div></div>';
+  h += '<table class="doc-table"><thead><tr>';
+  h += '<th>\uc21c\uc11c</th><th>\ud488\ubaa9</th><th>\ud488\ubc88</th><th>\uc218\ub7c9</th>';
+  h += '<th>\ub2e8\uc704</th><th>\ub2e8\uac00</th><th>\uacf5\uae09\uac00\uc561</th><th>\ube44\uace0</th>';
+  h += '</tr></thead><tbody>' + rows + '</tbody></table>';
+  h += '<div class="doc-totals"><table>';
+  h += '<tr><td>\uacf5\uae09\uac00\uc561</td><td>' + fmtN(supply) + '</td></tr>';
+  h += '<tr><td>\ubd80\uac00\uc138</td><td>' + fmtN(vat) + '</td></tr>';
+  h += '<tr><td>\uc18c\uacc4</td><td>' + fmtN(subtotal) + '</td></tr>';
+  h += negoRow;
+  h += '<tr class="doc-grand"><td>\ud569 \uacc4</td><td>' + fmtN(grand) + '</td></tr>';
+  h += '</table></div>';
+
+  document.getElementById('previewContent').innerHTML = h;
+  document.getElementById('previewModal').classList.add('active');
+  document.getElementById('previewModal').scrollTop = 0;
+}
+
+function closePreview() {
+  document.getElementById('previewModal').classList.remove('active');
+}
+
+// ---- 이벤트 바인딩 ----
+// 카카오톡 인앱브라우저: DOMContentLoaded 래핑 + touchend 폴백
+function bindEvents() {
+
+  // 품목 입력 (이벤트 위임)
+  var itemsList = document.getElementById('itemsList');
+  if (itemsList) {
+    itemsList.addEventListener('input', function(e) {
+      var el = e.target || e.srcElement;
+      if (!el || el.tagName !== 'INPUT') return;
+      var f = el.getAttribute('data-f');
+      var i = parseInt(el.getAttribute('data-i'), 10);
+      if (isNaN(i) || !f) return;
+      if (f === 'qty' || f === 'price') {
+        items[i][f] = toNum(el.value);
+      } else {
+        items[i][f] = el.value;
+      }
+      updateSub(i);
+      calcTotals();
+    });
+
+    // change 이벤트도 추가 (일부 카카오 WebView에서 input 미발화 대비)
+    itemsList.addEventListener('change', function(e) {
+      var el = e.target || e.srcElement;
+      if (!el || el.tagName !== 'INPUT') return;
+      var f = el.getAttribute('data-f');
+      var i = parseInt(el.getAttribute('data-i'), 10);
+      if (isNaN(i) || !f) return;
+      if (f === 'qty' || f === 'price') {
+        items[i][f] = toNum(el.value);
+      } else {
+        items[i][f] = el.value;
+      }
+      updateSub(i);
+      calcTotals();
+    });
+
+    // 품목 삭제 (click + touchend 이중 바인딩)
+    function handleRemove(e) {
+      var el = e.target || e.srcElement;
+      while (el && el !== itemsList) {
+        if (el.getAttribute && el.getAttribute('data-action') === 'remove') {
+          e.preventDefault();
+          var i = parseInt(el.getAttribute('data-idx'), 10);
+          if (!isNaN(i)) {
+            if (items.length <= 1) { alert('\uc81c\ub110 1\uac1c \ud488\ubaa9\uc774 \ud544\uc694\ud569\ub2c8\ub2e4.'); return; }
+            items.splice(i, 1);
+            renderItems();
+          }
+          return;
+        }
+        el = el.parentNode;
+      }
+    }
+    itemsList.addEventListener('click', handleRemove);
+    itemsList.addEventListener('touchend', handleRemove);
+  }
+
+  // 네고 금액
+  var negoEl = document.getElementById('negoAmount');
+  if (negoEl) {
+    negoEl.addEventListener('input', function() { calcTotals(); });
+    negoEl.addEventListener('change', function() { calcTotals(); });
+  }
+
+  // 버튼 공통 바인딩 함수 (click + touchend)
+  function bindBtn(id, fn) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', function(e) { e.preventDefault(); fn(); });
+    el.addEventListener('touchend', function(e) { e.preventDefault(); fn(); });
+  }
+
+  bindBtn('btnAddItem', function() {
+    items.push({ name:'', code:'', qty:1, unit:'\uac1c', price:0, note:'' });
+    renderItems();
+    setTimeout(function() {
+      var cards = document.querySelectorAll('.item-card');
+      var last = cards[cards.length - 1];
+      if (last) {
+        last.scrollIntoView({ block:'center' });
+        var inp = last.querySelectorAll('input');
+        if (inp[0]) inp[0].focus();
+      }
+    }, 80);
+  });
+
+  bindBtn('btnTopPreview',    function() { showPreview(); });
+  bindBtn('btnBottomPreview', function() { showPreview(); });
+  bindBtn('btnModalClose',    function() { closePreview(); });
+  bindBtn('btnModalPrint',    function() { window.print(); });
+
+  var modal = document.getElementById('previewModal');
+  if (modal) {
+    function handleModalBg(e) {
+      if ((e.target || e.srcElement) === modal) closePreview();
+    }
+    modal.addEventListener('click', handleModalBg);
+    modal.addEventListener('touchend', handleModalBg);
+  }
+}
+
+// DOMContentLoaded + 즉시 실행 이중 보장 (카카오 WebView 대응)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    renderItems();
+    bindEvents();
+  });
+} else {
+  renderItems();
+  bindEvents();
+}
+</script>
+</body>
+</html>
